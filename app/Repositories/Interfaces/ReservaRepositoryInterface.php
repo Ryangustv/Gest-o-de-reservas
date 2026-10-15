@@ -1,12 +1,14 @@
 <?php
 
-namespace App;
+namespace App\Repositories\Interfaces;
+
+use App\Models\ReservaModel;
 
 interface ReservaRepositoryInterface
 {
-    public function delete(int $reservaId): JsonResponse;
+    public function delete(int $reservaId);
 
-    public function findById(int $reservaId): ?Reserva;
+    public function findById(int $reservaId): ReservaModel;
 
-    public function findAll(): Response;
+    public function findAll();
 }

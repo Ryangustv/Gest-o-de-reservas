@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\EmpreendimentoService;
+use App\ViewModels\EmpreendimentosViewModel;
+use Inertia\Inertia;
+use Illuminate\Http\JsonResponse;
 
 class EmpreendimentoController extends Controller
 {
@@ -19,5 +22,5 @@ class EmpreendimentoController extends Controller
         return Inertia::render('empreendimentos/index', [
             'empreendimentos' => $viewModel->empreendimentos(),
         ]);
-    } 
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\UnidadeModel;
 
 class ReservaModel extends Model
 {
@@ -16,4 +17,9 @@ class ReservaModel extends Model
         'cliente_email',
         'data_reserva',
     ];
+
+    public function unidade()
+    {
+        return $this->belongsTo(UnidadeModel::class, 'unidade_id');
+    }
 }

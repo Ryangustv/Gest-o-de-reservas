@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\EmpreendimentoModel;
 
 class UnidadeModel extends Model
 {
@@ -15,4 +16,9 @@ class UnidadeModel extends Model
         'numero',
         'status',
     ];
+
+    public function empreendimento()
+    {
+        return $this->belongsTo(EmpreendimentoModel::class, 'empreendimento_id');
+    }
 }

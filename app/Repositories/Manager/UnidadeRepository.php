@@ -1,9 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Repositories\Manager;
 
 class UnidadeRepository implements UnidadeRepositoryInterface
 {
     //
 }
- 

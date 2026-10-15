@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\UnidadeModel;
 
 class EmpreendimentoModel extends Model
 {
@@ -14,4 +15,9 @@ class EmpreendimentoModel extends Model
         'nome',
         'cidade',
     ];
+
+    public function unidades()
+    {
+        return $this->hasMany(UnidadeModel::class, 'empreendimento_id');
+    }
 }

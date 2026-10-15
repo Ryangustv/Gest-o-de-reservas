@@ -3,9 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\ReservaModel;
+use App\Services\ReservaService;
+use App\ViewModels\ReservaViewModel;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
+
 
 class ReservaController extends Controller
-{   
+{
     public function __construct(protected ReservaService $reservaService) {}
 
     public function buscarReservasIndex() : Response
@@ -22,15 +30,13 @@ class ReservaController extends Controller
     public function cadastrarReserva(Request $request): JsonResponse
     {
         $validatedData = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'telefone' => 'required|string|max:20',
+            'unidade_id' => 'required|exists:unidade,id',
+            'cliente_nome' => 'required|string|max:255',
+            'cliente_email' => 'required|email|max:255',
             'data_reserva' => 'required|date',
-            'hora_reserva' => 'required|date_format:H:i',
-            'quantidade_pessoas' => 'required|integer|min:1',
         ]);
 
-        $reserva = new Reserva($validatedData);
+        $reserva = new ReservaViewModel($validatedData);
         $reserva->save();
 
         return response()->json([

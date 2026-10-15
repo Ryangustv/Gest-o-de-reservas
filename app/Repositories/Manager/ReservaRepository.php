@@ -1,26 +1,28 @@
 <?php
 
-namespace App;
+namespace App\Repositories\Manager;
+
+use App\Models\ReservaModel;
+use App\Repositories\Interfaces\ReservaRepositoryInterface;
 
 class ReservaRepository implements ReservaRepositoryInterface
 {
 
-    public function findById(int $reservaId): ?Reserva
+    public function findById(int $reservaId): ReservaModel
     {
-        return Reserva::findOrFail($reservaId);
-    }  
-
-    public function findAll(): Response
-    {
-        return Reserva::all()->toArray();
+        return ReservaModel::findOrFail($reservaId);
     }
 
-    public function delete(int $reservaId): JsonResponse
+    public function findAll()
     {
-        $reserva = Reserva::findOrFail($reservaId);
+        return ReservaModel::all();
+    }
+
+    public function delete(int $reservaId)
+    {
+        $reserva = ReservaModel::findOrFail($reservaId);
         if ($reserva) {
             $reserva->delete();
         }
     }
 }
- 

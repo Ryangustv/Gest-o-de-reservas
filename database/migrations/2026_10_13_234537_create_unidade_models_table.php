@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('empreendimento_id')->constrained('empreendimentos');
             $table->string('numero', 10);
-            $table->string('status', 20);
             $table->enum('status', ['disponivel', 'reservado'])->default('disponivel');
         });
     }
