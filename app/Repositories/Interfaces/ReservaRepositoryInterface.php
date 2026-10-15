@@ -11,4 +11,6 @@ interface ReservaRepositoryInterface
     public function findById(int $reservaId): ReservaModel;
 
     public function findAll();
+
+    public function create(ReservaModel $reserva): ReservaModel;
 }

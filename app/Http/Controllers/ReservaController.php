@@ -37,7 +37,7 @@ class ReservaController extends Controller
         ]);
 
         $reserva = new ReservaViewModel($validatedData);
-        $reserva->save();
+        $reserva = $this->reservaService->create($reserva);
 
         return response()->json([
             'success' => true,

@@ -25,4 +25,9 @@ class ReservaRepository implements ReservaRepositoryInterface
             $reserva->delete();
         }
     }
+
+    public function create(ReservaModel $reserva): ReservaModel
+    {
+        return ReservaModel::create($reserva);
+    }
 }
