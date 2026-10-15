@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('unidade_models', function (Blueprint $table) {
+        Schema::create('unidade', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('empreendimento_id')->constrained('empreendimentos');
+            $table->string('numero', 10);
+            $table->string('status', 20);
+            $table->enum('status', ['disponivel', 'reservado'])->default('disponivel');
         });
     }
 
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('unidade_models');
+        Schema::dropIfExists('unidade');
     }
 };

@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reserva_models', function (Blueprint $table) {
+        Schema::create('reserva', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('unidade_id')->constrained('unidade');
+            $table->string('cliente_nome', 100);
+            $table->string('cliente_email', 100);
+            $table->date('data_reserva');
         });
     }
 
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reserva_models');
+        Schema::dropIfExists('reserva');
     }
 };

@@ -6,5 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReservaModel extends Model
 {
-    //
+    protected $table = 'reserva';
+
+    public $timestamps = false;
+
+    protected $fillable = [
+        'unidade_id',
+        'cliente_nome',
+        'cliente_email',
+        'data_reserva',
+    ];
 }
