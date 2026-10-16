@@ -6,10 +6,16 @@ use App\Models\EmpreendimentoModel;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Spatie\ViewModels\ViewModel;
 
-class EmpreendimentoViewModel extends ViewModel
+class EmpreendimentosViewModel extends ViewModel
 {
     public function __construct(
-        public ?LengthAwarePaginator $empreendimentos = null,
-        public ?EmpreendimentoModel $empreendimento = null
+        public $empreendimentos
     ) {}
+
+    public function toArray(): array
+    {
+        return [
+            'Empreendimentos' => $this->empreendimentos,
+        ];
+    }
 }

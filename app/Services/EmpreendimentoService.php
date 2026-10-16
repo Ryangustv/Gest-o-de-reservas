@@ -10,6 +10,12 @@ class EmpreendimentoService
 
     public function findAll()
     {
-        return $this->repositoryInterface->findAll();
+        $empreendimentos = $this->repositoryInterface->findAll();
+
+        if ($empreendimentos === null) {
+            return [];
+        }
+
+        return $empreendimentos;
     }
 }

@@ -6,6 +6,7 @@ use App\Repositories\Interfaces\ReservaRepositoryInterface;
 use App\Repositories\Interfaces\UnidadeRepositoryInterface;
 use App\Models\ReservaModel;
 use Illuminate\Http\JsonResponse;
+use Exception;
 
 class ReservaService
 {
@@ -27,16 +28,21 @@ class ReservaService
         return $this->repositoryInterface->delete($reservaId);
     }
 
-    public function create(ReservaModel $reserva): ReservaModel
+    public function create(array $reserva): ReservaModel
     {
-        $unidade = $this->unidadeRepositoryInterface->findByUnidadeId($reserva->unidade_id);
+        $unidade = $reserva['unidade_id'];
 
-        if ($unidade && $unidade->status === 'reservado') {
-            return response()->json(['message' => 'A reserva já está reservada e não pode ser criada novamente.'], 400);
+        $existe = ReservaModel::where('unidade_id', $unidade)->exists();
+
+        if ($existe) {
+            throw new Exception('Já existe uma reserva para a unidade.');
         }
 
-        $reserva = $this->repositoryInterface->create($reserva);
-        $this->unidadeRepositoryInterface->update($unidade->id, 'reservado');
-        return new ReservaModel($reserva);
+        return DB::transaction(function () use ($reserva, $unidade) {
+            $reserva = $this->repositoryInterface->create($reserva);
+            $this->unidadeRepositoryInterface->update($unidade, 'reservado');
+
+            return $reserva;
+        });
     }
 }

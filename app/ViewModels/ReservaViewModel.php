@@ -9,7 +9,13 @@ use Spatie\ViewModels\ViewModel;
 class ReservaViewModel extends ViewModel
 {
     public function __construct(
-        public ?LengthAwarePaginator $reservas = null,
-        public ?ReservaModel $reserva = null
+        public $reserva
     ) {}
+
+        public function toArray(): array
+    {
+        return [
+            'reserva' => $this->reserva,
+        ];
+    }
 }

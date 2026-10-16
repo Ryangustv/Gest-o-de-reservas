@@ -7,7 +7,7 @@ use App\Models\ReservaModel;
 use App\Services\ReservaService;
 use App\ViewModels\ReservaViewModel;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
+use Inertia\Response;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
@@ -22,8 +22,8 @@ class ReservaController extends Controller
 
         $viewModel = new ReservaViewModel($reservas);
 
-        return Inertia::render('reservas/index', [
-            'reservas' => $viewModel->reservas(),
+        return Inertia::render('Reservas/index', [
+            'reservas' => $viewModel->toArray(),
         ]);
     }
 
@@ -36,7 +36,7 @@ class ReservaController extends Controller
             'data_reserva' => 'required|date',
         ]);
 
-        $reserva = new ReservaViewModel($validatedData);
+        $reserva = new ReservaModel($validatedData);
         $reserva = $this->reservaService->create($reserva);
 
         return response()->json([
