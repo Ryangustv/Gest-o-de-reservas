@@ -21,8 +21,6 @@ class EmpreendimentoController extends Controller
 
         $viewModel = new EmpreendimentosViewModel($empreendimentos);
 
-        return Inertia::render('Empreendimento/index', [
-            'Empreendimento' => $viewModel->toArray(),
-        ]);
+        return Inertia::render('Empreendimento/index', $viewModel->toArray());
     }
 }
