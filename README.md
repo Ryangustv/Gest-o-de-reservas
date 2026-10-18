@@ -26,7 +26,6 @@ Mantenha o terminal e o Docker em execução durante a avaliação.
 - Reservas: [http://localhost:8000/reservas](http://localhost:8000/reservas)
 - Swagger: [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)
 
-Para importar os endpoints no Postman, use o botão **Exportar para Postman** no Swagger e importe o arquivo baixado.
 
 ## Testes
 
