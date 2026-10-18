@@ -1,7 +1,5 @@
 # Gestão de Reservas
 
-Teste técnico desenvolvido com Laravel e React para listar empreendimentos, reservar unidades e consultar ou cancelar reservas.
-
 ## Pré-requisitos
 
 - PHP 8.3+ com `pdo_pgsql` e `redis` (`pdo_sqlite` para os testes).
