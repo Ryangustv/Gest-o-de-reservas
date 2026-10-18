@@ -26,7 +26,13 @@ class ReservaService
 
     public function delete(int $reservaId)
     {
-        return $this->repositoryInterface->delete($reservaId);
+        return DB::transaction(function () use ($reservaId) {
+            $reserva = $this->repositoryInterface->findById($reservaId);
+            $unidade = UnidadeModel::whereKey($reserva->unidade_id)->lockForUpdate()->firstOrFail();
+
+            $this->repositoryInterface->delete($reservaId);
+            $this->unidadeRepositoryInterface->update($unidade->id, 'disponivel');
+        });
     }
 
     public function create(array $reserva): ReservaModel

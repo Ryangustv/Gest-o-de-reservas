@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\ReservaModel;
 use App\Services\ReservaService;
 use App\ViewModels\ReservaViewModel;
 use Illuminate\Http\JsonResponse;
 use Inertia\Response;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Gate;
 
 
 class ReservaController extends Controller
@@ -22,9 +20,7 @@ class ReservaController extends Controller
 
         $viewModel = new ReservaViewModel($reservas);
 
-        return Inertia::render('Reservas/index', [
-            'reservas' => $viewModel->toArray(),
-        ]);
+        return Inertia::render('Reservas/index', $viewModel->toArray());
     }
 
     public function cadastrarReserva(Request $request): JsonResponse
@@ -46,10 +42,6 @@ class ReservaController extends Controller
 
     public function deletarReserva(int $reservaId): JsonResponse
     {
-        $reserva = $this->reservaService->findById($reservaId);
-
-        Gate::authorize('delete', $reserva);
-
         $this->reservaService->delete($reservaId);
 
         return response()->json([

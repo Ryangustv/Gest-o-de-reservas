@@ -13,9 +13,9 @@ body { margin: 0; background: #f5f7fa; color: #172b4d; font-family: var(--font-s
 .empreendimentos-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 28px; flex-wrap: wrap; }
 .empreendimentos-page h1 { font-size: 2rem; font-weight: 700; }
 .empreendimentos-page h2 { font-size: 1.25rem; font-weight: 600; }
-.empreendimentos-page button { background: #1d4ed8; color: white; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
-.empreendimentos-page button:hover { background: #1e40af; }
-.empreendimentos-page button:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
+.empreendimentos-page button, .reservas-link { background: #1d4ed8; color: white; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+.empreendimentos-page button:hover, .reservas-link:hover { background: #1e40af; }
+.empreendimentos-page button:focus-visible, .reservas-link:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
 .empreendimentos-page button:disabled { opacity: .6; cursor: wait; }
 .empreendimentos-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); gap: 20px; }
 .empreendimento-card { padding: 24px; background: white; border: 1px solid #dce2eb; border-radius: 12px; }
@@ -32,3 +32,4 @@ body { margin: 0; background: #f5f7fa; color: #172b4d; font-family: var(--font-s
 .reserva-form input { width: 100%; border: 1px solid #8493a8; border-radius: 6px; padding: 10px; }
 .reserva-form input:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
 .reserva-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.reservas-link { display: inline-block; text-decoration: none; }

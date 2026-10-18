@@ -43,6 +43,7 @@ export default function Index({ Empreendimento = [] }) {
                     <h1>Empreendimentos</h1>
                     <p>Conheça os empreendimentos e suas unidades disponíveis.</p>
                 </div>
+                <a className="reservas-link" href="/reservas">Visualizar reservas</a>
                 <button type="button" onClick={atualizar} disabled={carregando || Boolean(selecionada)}>
                     {carregando ? 'Atualizando…' : 'Atualizar lista'}
                 </button>

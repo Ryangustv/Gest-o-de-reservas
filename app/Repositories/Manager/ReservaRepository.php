@@ -10,12 +10,12 @@ class ReservaRepository implements ReservaRepositoryInterface
 
     public function findById(int $reservaId): ReservaModel
     {
-        $query = ReservaModel::findOrFail($reservaId);
+        return ReservaModel::findOrFail($reservaId);
     }
 
     public function findAll()
     {
-        return ReservaModel::all();
+        return ReservaModel::with('unidade.empreendimento')->get();
     }
 
     public function delete(int $reservaId)
