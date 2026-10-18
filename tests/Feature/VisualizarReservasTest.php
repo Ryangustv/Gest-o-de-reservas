@@ -5,8 +5,11 @@ namespace Tests\Feature;
 use App\Models\EmpreendimentoModel;
 use App\Models\ReservaModel;
 use App\Models\UnidadeModel;
+use App\Repositories\Interfaces\ReservaRepositoryInterface;
+use App\Repositories\Interfaces\UnidadeRepositoryInterface;
 use App\Services\ReservaService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -28,7 +31,7 @@ class VisualizarReservasTest extends TestCase
         return $reserva;
     }
 
-    public function test_view_model_sends_reserva_and_unidade_data_to_page(): void
+    public function test_mostra_reservas_e_unidades_na_tela(): void
     {
         $this->withoutVite();
         $reserva = $this->reserva();
@@ -47,7 +50,7 @@ class VisualizarReservasTest extends TestCase
         );
     }
 
-    public function test_visitor_can_cancel_reserva_without_authentication(): void
+    public function test_visitante_pode_cancelar_reserva(): void
     {
         $this->mock(ReservaService::class, function ($mock) {
             $mock->shouldReceive('delete')->with(1)->once();
@@ -56,13 +59,35 @@ class VisualizarReservasTest extends TestCase
         $this->deleteJson('/reservas/1')->assertOk()->assertJson(['success' => true]);
     }
 
-    public function test_nonexistent_reserva_returns_not_found(): void
+    public function test_retorna_404_para_reserva_inexistente(): void
     {
         $this->mock(ReservaService::class, function ($mock) {
             $mock->shouldReceive('delete')->with(1)->once()
                 ->andThrow((new ModelNotFoundException)->setModel(ReservaModel::class, [1]));
         });
 
-        $this->deleteJson('/reservas/1')->assertNotFound();
+        $this->deleteJson('/reservas/1')->assertNotFound()->assertExactJson([
+            'success' => false,
+            'message' => 'Reserva não encontrada.',
+        ]);
+    }
+
+    public function test_nao_altera_unidade_quando_reserva_nao_existe(): void
+    {
+        $this->mock(ReservaRepositoryInterface::class, function ($mock) {
+            $mock->shouldReceive('findById')->with(999)->once()
+                ->andThrow((new ModelNotFoundException)->setModel(ReservaModel::class, [999]));
+            $mock->shouldNotReceive('delete');
+        });
+        $this->mock(UnidadeRepositoryInterface::class, function ($mock) {
+            $mock->shouldNotReceive('update');
+        });
+        DB::shouldReceive('transaction')->once()->andReturnUsing(fn ($callback) => $callback());
+        DB::shouldNotReceive('afterCommit');
+
+        $this->deleteJson('/reservas/999')->assertNotFound()->assertExactJson([
+            'success' => false,
+            'message' => 'Reserva não encontrada.',
+        ]);
     }
 }

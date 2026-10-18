@@ -1,0 +1,140 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API de Gestão de Reservas",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/empreendimentos": {
+            "get": {
+                "tags": [
+                    "Empreendimentos"
+                ],
+                "summary": "Listar empreendimentos e unidades",
+                "operationId": "c825a2b94fc83d4aed1a4c4c096476ae",
+                "responses": {
+                    "200": {
+                        "description": "Listagem de empreendimentos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reservas": {
+            "get": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Listar reservas",
+                "operationId": "03d171726fc4236a551df58d56654ca1",
+                "responses": {
+                    "200": {
+                        "description": "Listagem de reservas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Cadastrar reservas",
+                "operationId": "d268199833ea296ced3714d20fa3859f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "unidade_id",
+                                    "cliente_nome",
+                                    "cliente_email"
+                                ],
+                                "properties": {
+                                    "unidade_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "cliente_nome": {
+                                        "type": "string",
+                                        "example": "Ana Silva",
+                                        "maxLength": 100
+                                    },
+                                    "cliente_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ana@example.com",
+                                        "maxLength": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cadastro de reservas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reservas/{reservaId}": {
+            "delete": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Cancelar reservas",
+                "operationId": "056fd8aec457359863c15c3341c8758e",
+                "parameters": [
+                    {
+                        "name": "reservaId",
+                        "in": "path",
+                        "description": "ID da reserva a ser cancelada",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reserva cancelada"
+                    },
+                    "404": {
+                        "description": "Reserva não encontrada"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Empreendimentos",
+            "description": "Empreendimentos"
+        },
+        {
+            "name": "Reservas",
+            "description": "Reservas"
+        }
+    ]
+}

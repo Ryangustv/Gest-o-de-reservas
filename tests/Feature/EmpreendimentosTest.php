@@ -8,7 +8,13 @@ use Tests\TestCase;
 
 class EmpreendimentosTest extends TestCase
 {
-    private function mockEmpreendimentos(array $empreendimentos): void
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['cache.stores.redis.driver' => 'array']);
+    }
+
+    private function simularEmpreendimentos(array $empreendimentos): void
     {
         $this->mock(EmpreendimentoRepositoryInterface::class, function ($mock) use ($empreendimentos) {
             $mock->shouldReceive('findAll')->once()->andReturn($empreendimentos);
@@ -28,10 +34,10 @@ class EmpreendimentosTest extends TestCase
         ]];
     }
 
-    public function test_route_renders_page_with_empreendimentos_and_unidades(): void
+    public function test_mostra_empreendimentos_e_unidades_na_tela(): void
     {
         $this->withoutVite();
-        $this->mockEmpreendimentos($this->empreendimentos());
+        $this->simularEmpreendimentos($this->empreendimentos());
 
         $this->get('/empreendimentos')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('Empreendimento/index')
@@ -42,18 +48,18 @@ class EmpreendimentosTest extends TestCase
         );
     }
 
-    public function test_route_returns_json_for_fetch_requests(): void
+    public function test_retorna_empreendimentos_em_json(): void
     {
-        $this->mockEmpreendimentos($this->empreendimentos());
+        $this->simularEmpreendimentos($this->empreendimentos());
 
         $this->getJson('/empreendimentos')->assertOk()->assertExactJson([
             'Empreendimento' => $this->empreendimentos(),
         ]);
     }
 
-    public function test_route_returns_an_empty_list_when_no_empreendimentos_exist(): void
+    public function test_retorna_lista_vazia_quando_nao_ha_empreendimentos(): void
     {
-        $this->mockEmpreendimentos([]);
+        $this->simularEmpreendimentos([]);
 
         $this->getJson('/empreendimentos')->assertOk()->assertExactJson(['Empreendimento' => []]);
     }

@@ -14,7 +14,7 @@ class EmpreendimentoController extends Controller
 {
 
    public function __construct(protected EmpreendimentoService $empreendimentoService) {}
-
+   
    public function buscarEmpreendimentos(Request $request): Response|JsonResponse
     {
         $empreendimentos = $this->empreendimentoService->findAll();

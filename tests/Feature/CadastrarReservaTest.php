@@ -5,8 +5,11 @@ namespace Tests\Feature;
 use App\Models\EmpreendimentoModel;
 use App\Models\ReservaModel;
 use App\Models\UnidadeModel;
+use App\Repositories\Manager\ReservaRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Services\EmpreendimentoService;
+use Illuminate\Support\Facades\Cache;
 
 class CadastrarReservaTest extends TestCase
 {
@@ -19,6 +22,7 @@ class CadastrarReservaTest extends TestCase
         }
 
         parent::setUp();
+        config(['cache.stores.redis.driver' => 'array']);
     }
 
     private function unidade(string $status = 'disponivel'): UnidadeModel
@@ -37,18 +41,47 @@ class CadastrarReservaTest extends TestCase
         return ['unidade_id' => $unidade->id, 'cliente_nome' => 'Ana Silva', 'cliente_email' => 'ana@example.com'];
     }
 
-    public function test_reserva_is_created_and_unidade_becomes_reserved(): void
+    public function test_lista_reservas_mais_recentes_primeiro(): void
+    {
+        $primeira = ReservaModel::create([
+            ...$this->dados($this->unidade()),
+            'data_reserva' => '2026-10-18',
+        ]);
+        $segunda = ReservaModel::create([
+            ...$this->dados($this->unidade()),
+            'data_reserva' => '2026-10-18',
+        ]);
+
+        $this->assertSame([$segunda->id, $primeira->id], app(ReservaRepository::class)->findAll()->modelKeys());
+    }
+
+    public function test_cadastra_reserva_e_marca_unidade_como_reservada(): void
     {
         $unidade = $this->unidade();
         $dados = $this->dados($unidade);
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
 
         $this->postJson('/reservas', $dados)->assertCreated()->assertJson(['success' => true]);
 
         $this->assertDatabaseHas('reserva', [...$dados, 'data_reserva' => now()->toDateString()]);
         $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'reservado']);
+        $this->assertFalse(Cache::store('redis')->has(EmpreendimentoService::CACHE_KEY));
     }
 
-    public function test_reserved_unidade_cannot_be_reserved_again(): void
+    public function test_cancelamento_limpa_cache_e_libera_unidade(): void
+    {
+        $unidade = $this->unidade('reservado');
+        $reserva = ReservaModel::create([...$this->dados($unidade), 'data_reserva' => now()->toDateString()]);
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
+
+        $this->deleteJson('/reservas/'.$reserva->id)->assertOk();
+
+        $this->assertDatabaseMissing('reserva', ['id' => $reserva->id]);
+        $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'disponivel']);
+        $this->assertFalse(Cache::store('redis')->has(EmpreendimentoService::CACHE_KEY));
+    }
+
+    public function test_nao_permite_reservar_unidade_ja_reservada(): void
     {
         $unidade = $this->unidade('reservado');
 
@@ -57,7 +90,7 @@ class CadastrarReservaTest extends TestCase
         $this->assertDatabaseCount('reserva', 0);
     }
 
-    public function test_existing_reserva_prevents_a_second_reserva_even_with_inconsistent_status(): void
+    public function test_nao_permite_duas_reservas_para_mesma_unidade(): void
     {
         $unidade = $this->unidade();
         ReservaModel::create([...$this->dados($unidade), 'data_reserva' => now()->toDateString()]);
@@ -67,7 +100,7 @@ class CadastrarReservaTest extends TestCase
         $this->assertDatabaseCount('reserva', 1);
     }
 
-    public function test_invalid_client_data_does_not_reserve_unidade(): void
+    public function test_dados_invalidos_nao_reservam_unidade(): void
     {
         $unidade = $this->unidade();
 
