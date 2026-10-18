@@ -3,19 +3,20 @@
 namespace App\Services;
 
 use App\Repositories\Interfaces\EmpreendimentoRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 
 class EmpreendimentoService
 {
+    public const CACHE_KEY = 'empreendimentos.listagem';
+
     public function __construct(protected EmpreendimentoRepositoryInterface $repositoryInterface){}
 
     public function findAll()
     {
-        $empreendimentos = $this->repositoryInterface->findAll();
-
-        if ($empreendimentos === null) {
-            return [];
-        }
-
-        return $empreendimentos;
+        return Cache::store('redis')->remember(
+            self::CACHE_KEY,
+            300,
+            fn () => $this->repositoryInterface->findAll() ?? [],
+        );
     }
 }

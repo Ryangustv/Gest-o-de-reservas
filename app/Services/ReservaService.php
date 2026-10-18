@@ -7,6 +7,7 @@ use App\Repositories\Interfaces\UnidadeRepositoryInterface;
 use App\Models\ReservaModel;
 use App\Models\UnidadeModel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class ReservaService
@@ -32,6 +33,7 @@ class ReservaService
 
             $this->repositoryInterface->delete($reservaId);
             $this->unidadeRepositoryInterface->update($unidade->id, 'disponivel');
+            DB::afterCommit(fn () => Cache::store('redis')->forget(EmpreendimentoService::CACHE_KEY));
         });
     }
 
@@ -48,6 +50,7 @@ class ReservaService
 
             $reserva = $this->repositoryInterface->create(new ReservaModel($reserva));
             $this->unidadeRepositoryInterface->update($unidade->id, 'reservado');
+            DB::afterCommit(fn () => Cache::store('redis')->forget(EmpreendimentoService::CACHE_KEY));
 
             return $reserva;
         });
