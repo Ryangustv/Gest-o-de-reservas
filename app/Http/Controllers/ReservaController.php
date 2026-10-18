@@ -30,19 +30,18 @@ class ReservaController extends Controller
     public function cadastrarReserva(Request $request): JsonResponse
     {
         $validatedData = $request->validate([
-            'unidade_id' => 'required|exists:unidade,id',
-            'cliente_nome' => 'required|string|max:255',
-            'cliente_email' => 'required|email|max:255',
-            'data_reserva' => 'required|date',
+            'unidade_id' => 'required|integer|exists:unidade,id',
+            'cliente_nome' => 'required|string|max:100',
+            'cliente_email' => 'required|email|max:100',
         ]);
 
-        $reserva = new ReservaModel($validatedData);
-        $reserva = $this->reservaService->create($reserva);
+        $validatedData['data_reserva'] = now()->toDateString();
+        $this->reservaService->create($validatedData);
 
         return response()->json([
             'success' => true,
             'message' => 'Reserva cadastrada com sucesso',
-        ]);
+        ], 201);
     }
 
     public function deletarReserva(int $reservaId): JsonResponse

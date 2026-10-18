@@ -5,8 +5,9 @@ namespace App\Services;
 use App\Repositories\Interfaces\ReservaRepositoryInterface;
 use App\Repositories\Interfaces\UnidadeRepositoryInterface;
 use App\Models\ReservaModel;
-use Illuminate\Http\JsonResponse;
-use Exception;
+use App\Models\UnidadeModel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ReservaService
 {
@@ -30,17 +31,17 @@ class ReservaService
 
     public function create(array $reserva): ReservaModel
     {
-        $unidade = $reserva['unidade_id'];
+        return DB::transaction(function () use ($reserva) {
+            $unidade = UnidadeModel::whereKey($reserva['unidade_id'])->lockForUpdate()->firstOrFail();
 
-        $existe = ReservaModel::where('unidade_id', $unidade)->exists();
+            if ($unidade->status !== 'disponivel' || ReservaModel::where('unidade_id', $unidade->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'unidade_id' => 'Esta unidade não está mais disponível para reserva.',
+                ]);
+            }
 
-        if ($existe) {
-            throw new Exception('Já existe uma reserva para a unidade.');
-        }
-
-        return DB::transaction(function () use ($reserva, $unidade) {
-            $reserva = $this->repositoryInterface->create($reserva);
-            $this->unidadeRepositoryInterface->update($unidade, 'reservado');
+            $reserva = $this->repositoryInterface->create(new ReservaModel($reserva));
+            $this->unidadeRepositoryInterface->update($unidade->id, 'reservado');
 
             return $reserva;
         });

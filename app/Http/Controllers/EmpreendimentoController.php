@@ -15,11 +15,15 @@ class EmpreendimentoController extends Controller
 
    public function __construct(protected EmpreendimentoService $empreendimentoService) {}
 
-   public function buscarEmpreendimentos(): Response
+   public function buscarEmpreendimentos(Request $request): Response|JsonResponse
     {
         $empreendimentos = $this->empreendimentoService->findAll();
 
         $viewModel = new EmpreendimentosViewModel($empreendimentos);
+
+        if ($request->expectsJson() && ! $request->header('X-Inertia')) {
+            return response()->json($viewModel->toArray());
+        }
 
         return Inertia::render('Empreendimento/index', $viewModel->toArray());
     }

@@ -28,6 +28,8 @@ class ReservaRepository implements ReservaRepositoryInterface
 
     public function create(ReservaModel $reserva): ReservaModel
     {
-        return ReservaModel::create($reserva);
+        $reserva->save();
+
+        return $reserva;
     }
 }
