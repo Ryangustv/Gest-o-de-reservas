@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\CadastrarReservaRequest;
 use App\Services\ReservaService;
 use App\ViewModels\ReservaViewModel;
 use Illuminate\Http\JsonResponse;
@@ -23,13 +23,9 @@ class ReservaController extends Controller
         return Inertia::render('Reservas/index', $viewModel->toArray());
     }
 
-    public function cadastrarReserva(Request $request): JsonResponse
+    public function cadastrarReserva(CadastrarReservaRequest $request): JsonResponse
     {
-        $validatedData = $request->validate([
-            'unidade_id' => 'required|integer|exists:unidade,id',
-            'cliente_nome' => 'required|string|max:100',
-            'cliente_email' => 'required|email|max:100',
-        ]);
+        $validatedData = $request->validated();
 
         $validatedData['data_reserva'] = now()->toDateString();
         $this->reservaService->create($validatedData);
