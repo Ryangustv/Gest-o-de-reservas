@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CadastrarReservaRequest;
+use App\Models\ReservaModel;
 use App\Services\ReservaService;
 use App\ViewModels\ReservaViewModel;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Inertia\Response;
 use Inertia\Inertia;
 
@@ -38,7 +40,18 @@ class ReservaController extends Controller
 
     public function deletarReserva(int $reservaId): JsonResponse
     {
-        $this->reservaService->delete($reservaId);
+        try {
+            $this->reservaService->delete($reservaId);
+        } catch (ModelNotFoundException $exception) {
+            if ($exception->getModel() !== ReservaModel::class) {
+                throw $exception;
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Reserva não encontrada.',
+            ], 404);
+        }
 
         return response()->json([
             'success' => true,

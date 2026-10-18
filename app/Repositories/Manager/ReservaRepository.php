@@ -15,7 +15,7 @@ class ReservaRepository implements ReservaRepositoryInterface
 
     public function findAll()
     {
-        return ReservaModel::with('unidade.empreendimento')->get();
+        return ReservaModel::with('unidade.empreendimento')->orderByDesc('id')->get();
     }
 
     public function delete(int $reservaId)
