@@ -17,7 +17,7 @@ class EmpreendimentoController extends Controller
    
    public function buscarEmpreendimentos(Request $request): Response|JsonResponse
     {
-        $empreendimentos = $this->empreendimentoService->findAll();
+        $empreendimentos = $this->empreendimentoService->findAll($request->boolean('atualizar'));
 
         $viewModel = new EmpreendimentosViewModel($empreendimentos);
 

@@ -21,8 +21,8 @@ class ReservaViewModel extends ViewModel
                 'cliente_email' => $reserva->cliente_email,
                 'data_reserva' => $reserva->data_reserva,
                 'unidade' => [
-                    'numero' => $reserva->unidade?->numero,
-                    'empreendimento' => $reserva->unidade?->empreendimento?->nome,
+                    'numero' => $reserva->unidade_numero,
+                    'empreendimento' => $reserva->empreendimento_nome,
                 ],
             ])->values()->all(),
         ];

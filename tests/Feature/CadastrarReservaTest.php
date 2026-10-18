@@ -6,10 +6,12 @@ use App\Models\EmpreendimentoModel;
 use App\Models\ReservaModel;
 use App\Models\UnidadeModel;
 use App\Repositories\Manager\ReservaRepository;
+use App\ViewModels\ReservaViewModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Services\EmpreendimentoService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class CadastrarReservaTest extends TestCase
 {
@@ -52,7 +54,14 @@ class CadastrarReservaTest extends TestCase
             'data_reserva' => '2026-10-18',
         ]);
 
-        $this->assertSame([$segunda->id, $primeira->id], app(ReservaRepository::class)->findAll()->modelKeys());
+        DB::enableQueryLog();
+        $reservas = app(ReservaRepository::class)->findAll();
+        $dados = (new ReservaViewModel($reservas))->toArray();
+
+        $this->assertSame([$segunda->id, $primeira->id], array_column($dados['reservas'], 'id'));
+        $this->assertSame('101', $dados['reservas'][0]['unidade']['numero']);
+        $this->assertCount(1, DB::getQueryLog());
+        DB::disableQueryLog();
     }
 
     public function test_cadastra_reserva_e_marca_unidade_como_reservada(): void

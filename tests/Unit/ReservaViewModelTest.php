@@ -2,9 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Models\EmpreendimentoModel;
 use App\Models\ReservaModel;
-use App\Models\UnidadeModel;
 use App\ViewModels\ReservaViewModel;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
@@ -13,9 +11,6 @@ class ReservaViewModelTest extends TestCase
 {
     public function test_mostra_dados_do_cliente_e_da_unidade(): void
     {
-        $empreendimento = new EmpreendimentoModel(['nome' => 'Residencial Jardim']);
-        $unidade = new UnidadeModel(['numero' => '101']);
-        $unidade->setRelation('empreendimento', $empreendimento);
         $cliente = [
             'cliente_nome' => 'Ana Silva',
             'cliente_email' => 'ana@example.com',
@@ -23,7 +18,8 @@ class ReservaViewModelTest extends TestCase
         ];
         $reserva = new ReservaModel($cliente);
         $reserva->id = 1;
-        $reserva->setRelation('unidade', $unidade);
+        $reserva->unidade_numero = '101';
+        $reserva->empreendimento_nome = 'Residencial Jardim';
 
         $viewModel = new ReservaViewModel(new Collection([$reserva]));
 
@@ -44,7 +40,6 @@ class ReservaViewModelTest extends TestCase
     public function test_retorna_campos_nulos_quando_nao_ha_unidade(): void
     {
         $reserva = new ReservaModel;
-        $reserva->setRelation('unidade', null);
         $viewModel = new ReservaViewModel(new Collection([$reserva]));
         $dados = $viewModel->toArray();
 

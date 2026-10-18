@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Repositories\Interfaces\EmpreendimentoRepositoryInterface;
+use App\Services\EmpreendimentoService;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -62,5 +64,35 @@ class EmpreendimentosTest extends TestCase
         $this->simularEmpreendimentos([]);
 
         $this->getJson('/empreendimentos')->assertOk()->assertExactJson(['Empreendimento' => []]);
+    }
+
+    public function test_atualizar_lista_substitui_cache_pelos_dados_do_banco(): void
+    {
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, [], 300);
+        $this->simularEmpreendimentos($this->empreendimentos());
+
+        $this->getJson('/empreendimentos?atualizar=1')->assertOk()->assertExactJson([
+            'Empreendimento' => $this->empreendimentos(),
+        ]);
+
+        $this->assertSame($this->empreendimentos(), Cache::store('redis')->get(EmpreendimentoService::CACHE_KEY));
+
+        $this->getJson('/empreendimentos')->assertOk()->assertExactJson([
+            'Empreendimento' => $this->empreendimentos(),
+        ]);
+    }
+
+    public function test_acesso_normal_mantem_cache_sem_consultar_banco(): void
+    {
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, $this->empreendimentos(), 300);
+        $this->mock(EmpreendimentoRepositoryInterface::class, function ($mock) {
+            $mock->shouldNotReceive('findAll');
+        });
+
+        foreach (['/empreendimentos', '/empreendimentos?atualizar=0'] as $url) {
+            $this->getJson($url)->assertOk()->assertExactJson([
+                'Empreendimento' => $this->empreendimentos(),
+            ]);
+        }
     }
 }

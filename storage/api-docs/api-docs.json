@@ -12,6 +12,18 @@
                 ],
                 "summary": "Listar empreendimentos e unidades",
                 "operationId": "c825a2b94fc83d4aed1a4c4c096476ae",
+                "parameters": [
+                    {
+                        "name": "atualizar",
+                        "in": "query",
+                        "description": "Invalida o cache e busca os dados atuais no banco.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Listagem de empreendimentos",

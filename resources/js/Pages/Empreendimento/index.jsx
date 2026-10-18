@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import ReservaForm from '../../Components/ReservaForm';
 
 export default function Index({ Empreendimento = [] }) {
@@ -22,7 +22,10 @@ export default function Index({ Empreendimento = [] }) {
         setCarregando(true);
         setErro('');
         try {
-            const response = await fetch('/empreendimentos', { headers: { Accept: 'application/json' } });
+            const response = await fetch('/empreendimentos?atualizar=1', {
+                headers: { Accept: 'application/json' },
+                cache: 'no-store',
+            });
             if (!response.ok) throw new Error('Falha na consulta.');
             const dados = await response.json();
             if (!Array.isArray(dados.Empreendimento)) throw new Error('Resposta inválida.');
@@ -43,7 +46,7 @@ export default function Index({ Empreendimento = [] }) {
                     <h1>Empreendimentos</h1>
                     <p>Conheça os empreendimentos e suas unidades disponíveis.</p>
                 </div>
-                <a className="reservas-link" href="/reservas">Visualizar reservas</a>
+                <Link className="reservas-link" href="/reservas">Visualizar reservas</Link>
                 <button type="button" onClick={atualizar} disabled={carregando || Boolean(selecionada)}>
                     {carregando ? 'Atualizando…' : 'Atualizar lista'}
                 </button>

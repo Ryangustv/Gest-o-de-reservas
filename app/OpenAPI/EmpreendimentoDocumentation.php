@@ -10,6 +10,15 @@ class EmpreendimentoDocumentation
     path: '/empreendimentos',
     summary: 'Listar empreendimentos e unidades',
     tags: ['Empreendimentos'],
+    parameters: [
+        new OA\Parameter(
+            name: 'atualizar',
+            in: 'query',
+            description: 'Invalida o cache e busca os dados atuais no banco.',
+            required: false,
+            schema: new OA\Schema(type: 'boolean', default: false)
+        )
+    ],
     responses: [
         new OA\Response(
             response: 200,

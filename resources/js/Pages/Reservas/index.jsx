@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 export default function Index({ reservas = [] }) {
     const [lista, setLista] = useState(reservas);
@@ -38,7 +38,7 @@ export default function Index({ reservas = [] }) {
             <Head title="Reservas" />
             <header className="empreendimentos-header">
                 <h1>Reservas</h1>
-                <a className="reservas-link" href="/empreendimentos">Voltar aos empreendimentos</a>
+                <Link className="reservas-link" href="/empreendimentos">Voltar aos empreendimentos</Link>
             </header>
             {erro && <p role="alert" className="empreendimentos-error">{erro}</p>}
             {sucesso && <p role="status" className="empreendimentos-notice">{sucesso}</p>}

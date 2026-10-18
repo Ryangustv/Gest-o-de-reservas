@@ -15,7 +15,12 @@ class ReservaRepository implements ReservaRepositoryInterface
 
     public function findAll()
     {
-        return ReservaModel::with('unidade.empreendimento')->orderByDesc('id')->get();
+        return ReservaModel::query()
+            ->leftJoin('unidade', 'unidade.id', '=', 'reserva.unidade_id')
+            ->leftJoin('empreendimentos', 'empreendimentos.id', '=', 'unidade.empreendimento_id')
+            ->select('reserva.*', 'unidade.numero as unidade_numero', 'empreendimentos.nome as empreendimento_nome')
+            ->orderByDesc('reserva.id')
+            ->get();
     }
 
     public function delete(int $reservaId)

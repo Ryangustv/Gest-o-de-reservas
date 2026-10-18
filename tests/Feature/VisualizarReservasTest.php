@@ -2,9 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\EmpreendimentoModel;
 use App\Models\ReservaModel;
-use App\Models\UnidadeModel;
 use App\Repositories\Interfaces\ReservaRepositoryInterface;
 use App\Repositories\Interfaces\UnidadeRepositoryInterface;
 use App\Services\ReservaService;
@@ -17,16 +15,14 @@ class VisualizarReservasTest extends TestCase
 {
     private function reserva(): ReservaModel
     {
-        $empreendimento = new EmpreendimentoModel(['nome' => 'Residencial Jardim']);
-        $unidade = new UnidadeModel(['numero' => '101']);
-        $unidade->setRelation('empreendimento', $empreendimento);
         $reserva = new ReservaModel([
             'cliente_nome' => 'Ana Silva',
             'cliente_email' => 'ana@example.com',
             'data_reserva' => '2026-10-18',
         ]);
         $reserva->id = 1;
-        $reserva->setRelation('unidade', $unidade);
+        $reserva->unidade_numero = '101';
+        $reserva->empreendimento_nome = 'Residencial Jardim';
 
         return $reserva;
     }

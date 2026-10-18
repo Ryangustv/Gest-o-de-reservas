@@ -11,8 +11,12 @@ class EmpreendimentoService
 
     public function __construct(protected EmpreendimentoRepositoryInterface $repositoryInterface){}
 
-    public function findAll()
+    public function findAll(bool $atualizarCache = false)
     {
+        if ($atualizarCache) {
+            Cache::store('redis')->forget(self::CACHE_KEY);
+        }
+
         return Cache::store('redis')->remember(
             self::CACHE_KEY,
             300,
