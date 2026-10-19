@@ -15,6 +15,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "laravel/boost": "^2.10",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.27",
@@ -37,6 +38,7 @@
     "scripts": {
         "setup": [
             "Composer\\Config::disableProcessTimeout",
+            "@setup:redis",
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
@@ -46,6 +48,10 @@
             "@php artisan l5-swagger:generate",
             "npm run build",
             "@php artisan serve"
+        ],
+        "setup:redis": [
+            "@php -r \"exit(extension_loaded('redis') ? 0 : 1);\" || sudo dnf install php-pecl-redis6",
+            "@php -r \"if (!extension_loaded('redis')) { fwrite(STDERR, 'A extensão Redis não foi carregada pelo PHP.'.PHP_EOL); exit(1); }\""
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
