@@ -15,7 +15,7 @@ class EmpreendimentosViewModel extends ViewModel
     public function toArray(): array
     {
         return [
-            'Empreendimento' => array_map(function ($empreendimento) {
+            'empreendimento' => array_map(function ($empreendimento) {
                 return [
                     'id' => $empreendimento['id'] ?? null,
                     'nome' => $empreendimento['nome'] ?? null,

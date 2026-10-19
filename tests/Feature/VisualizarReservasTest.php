@@ -4,10 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\ReservaModel;
 use App\Repositories\Interfaces\ReservaRepositoryInterface;
-use App\Repositories\Interfaces\UnidadeRepositoryInterface;
 use App\Services\ReservaService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -68,18 +66,12 @@ class VisualizarReservasTest extends TestCase
         ]);
     }
 
-    public function test_nao_altera_unidade_quando_reserva_nao_existe(): void
+    public function test_service_propaga_reserva_inexistente_do_repository(): void
     {
         $this->mock(ReservaRepositoryInterface::class, function ($mock) {
-            $mock->shouldReceive('findById')->with(999)->once()
+            $mock->shouldReceive('delete')->with(999)->once()
                 ->andThrow((new ModelNotFoundException)->setModel(ReservaModel::class, [999]));
-            $mock->shouldNotReceive('delete');
         });
-        $this->mock(UnidadeRepositoryInterface::class, function ($mock) {
-            $mock->shouldNotReceive('update');
-        });
-        DB::shouldReceive('transaction')->once()->andReturnUsing(fn ($callback) => $callback());
-        DB::shouldNotReceive('afterCommit');
 
         $this->deleteJson('/reservas/999')->assertNotFound()->assertExactJson([
             'success' => false,

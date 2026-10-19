@@ -6,12 +6,15 @@ use App\Models\EmpreendimentoModel;
 use App\Models\ReservaModel;
 use App\Models\UnidadeModel;
 use App\Repositories\Manager\ReservaRepository;
-use App\ViewModels\ReservaViewModel;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Services\EmpreendimentoService;
+use App\ViewModels\ReservaViewModel;
+use Illuminate\Cache\Events\KeyForgotten;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use RuntimeException;
+use Tests\TestCase;
 
 class CadastrarReservaTest extends TestCase
 {
@@ -69,11 +72,24 @@ class CadastrarReservaTest extends TestCase
         $unidade = $this->unidade();
         $dados = $this->dados($unidade);
         Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
+        $nivelTransacaoInicial = DB::transactionLevel();
+        $cacheInvalidado = false;
+        Event::listen(KeyForgotten::class, function (KeyForgotten $evento) use ($unidade, $nivelTransacaoInicial, &$cacheInvalidado): void {
+            if ($evento->key !== EmpreendimentoService::CACHE_KEY) {
+                return;
+            }
+
+            $cacheInvalidado = true;
+            $this->assertSame($nivelTransacaoInicial, DB::transactionLevel());
+            $this->assertDatabaseHas('reserva', ['unidade_id' => $unidade->id]);
+            $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'reservado']);
+        });
 
         $this->postJson('/reservas', $dados)->assertCreated()->assertJson(['success' => true]);
 
         $this->assertDatabaseHas('reserva', [...$dados, 'data_reserva' => now()->toDateString()]);
         $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'reservado']);
+        $this->assertTrue($cacheInvalidado);
         $this->assertFalse(Cache::store('redis')->has(EmpreendimentoService::CACHE_KEY));
     }
 
@@ -82,12 +98,78 @@ class CadastrarReservaTest extends TestCase
         $unidade = $this->unidade('reservado');
         $reserva = ReservaModel::create([...$this->dados($unidade), 'data_reserva' => now()->toDateString()]);
         Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
+        $nivelTransacaoInicial = DB::transactionLevel();
+        $cacheInvalidado = false;
+        Event::listen(KeyForgotten::class, function (KeyForgotten $evento) use ($unidade, $reserva, $nivelTransacaoInicial, &$cacheInvalidado): void {
+            if ($evento->key !== EmpreendimentoService::CACHE_KEY) {
+                return;
+            }
+
+            $cacheInvalidado = true;
+            $this->assertSame($nivelTransacaoInicial, DB::transactionLevel());
+            $this->assertDatabaseMissing('reserva', ['id' => $reserva->id]);
+            $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'disponivel']);
+        });
 
         $this->deleteJson('/reservas/'.$reserva->id)->assertOk();
 
         $this->assertDatabaseMissing('reserva', ['id' => $reserva->id]);
         $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'disponivel']);
+        $this->assertTrue($cacheInvalidado);
         $this->assertFalse(Cache::store('redis')->has(EmpreendimentoService::CACHE_KEY));
+    }
+
+    public function test_falha_ao_atualizar_unidade_desfaz_criacao_e_preserva_cache(): void
+    {
+        $unidade = $this->unidade();
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
+        $falhouAtualizacao = false;
+        Event::listen('eloquent.updated: '.UnidadeModel::class, function () use (&$falhouAtualizacao): void {
+            $falhouAtualizacao = true;
+            throw new RuntimeException('Falha ao atualizar a unidade.');
+        });
+
+        $this->postJson('/reservas', $this->dados($unidade))->assertInternalServerError();
+
+        $this->assertTrue($falhouAtualizacao);
+        $this->assertDatabaseCount('reserva', 0);
+        $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'disponivel']);
+        $this->assertSame(['dados anteriores'], Cache::store('redis')->get(EmpreendimentoService::CACHE_KEY));
+    }
+
+    public function test_falha_ao_atualizar_unidade_desfaz_cancelamento_e_preserva_cache(): void
+    {
+        $unidade = $this->unidade('reservado');
+        $dados = [...$this->dados($unidade), 'data_reserva' => now()->toDateString()];
+        $reserva = ReservaModel::create($dados);
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
+        $falhouAtualizacao = false;
+        Event::listen('eloquent.updated: '.UnidadeModel::class, function () use (&$falhouAtualizacao): void {
+            $falhouAtualizacao = true;
+            throw new RuntimeException('Falha ao atualizar a unidade.');
+        });
+
+        $this->deleteJson('/reservas/'.$reserva->id)->assertInternalServerError();
+
+        $this->assertTrue($falhouAtualizacao);
+        $this->assertDatabaseHas('reserva', ['id' => $reserva->id, ...$dados]);
+        $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'reservado']);
+        $this->assertSame(['dados anteriores'], Cache::store('redis')->get(EmpreendimentoService::CACHE_KEY));
+    }
+
+    public function test_nao_altera_unidade_nem_cache_quando_reserva_nao_existe(): void
+    {
+        $unidade = $this->unidade('reservado');
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
+
+        $this->deleteJson('/reservas/999')->assertNotFound()->assertExactJson([
+            'success' => false,
+            'message' => 'Reserva não encontrada.',
+        ]);
+
+        $this->assertDatabaseCount('reserva', 0);
+        $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'reservado']);
+        $this->assertSame(['dados anteriores'], Cache::store('redis')->get(EmpreendimentoService::CACHE_KEY));
     }
 
     public function test_nao_permite_reservar_unidade_ja_reservada(): void
@@ -103,10 +185,13 @@ class CadastrarReservaTest extends TestCase
     {
         $unidade = $this->unidade();
         ReservaModel::create([...$this->dados($unidade), 'data_reserva' => now()->toDateString()]);
+        Cache::store('redis')->put(EmpreendimentoService::CACHE_KEY, ['dados anteriores'], 300);
 
         $this->postJson('/reservas', $this->dados($unidade))->assertUnprocessable()->assertJsonValidationErrors('unidade_id');
 
         $this->assertDatabaseCount('reserva', 1);
+        $this->assertDatabaseHas('unidade', ['id' => $unidade->id, 'status' => 'disponivel']);
+        $this->assertSame(['dados anteriores'], Cache::store('redis')->get(EmpreendimentoService::CACHE_KEY));
     }
 
     public function test_dados_invalidos_nao_reservam_unidade(): void

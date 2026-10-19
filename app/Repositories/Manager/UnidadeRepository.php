@@ -9,7 +9,7 @@ class UnidadeRepository implements UnidadeRepositoryInterface
 {
     public function findByUnidadeId(int $unidadeId): UnidadeModel
     {
-        return UnidadeModel::findOrFail($unidadeId);
+        return UnidadeModel::whereKey($unidadeId)->lockForUpdate()->firstOrFail();
     }
 
     public function update(int $unidadeId, string $status): void

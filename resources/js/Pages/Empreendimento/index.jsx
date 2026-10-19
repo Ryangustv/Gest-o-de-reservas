@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import ReservaForm from '../../Components/ReservaForm';
 
-export default function Index({ Empreendimento = [] }) {
-    const [empreendimentos, setEmpreendimentos] = useState(Empreendimento);
+export default function Index({ empreendimento = [] }) {
+    const [empreendimentos, setEmpreendimentos] = useState(empreendimento);
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState('');
     const [selecionada, setSelecionada] = useState(null);
@@ -28,8 +28,8 @@ export default function Index({ Empreendimento = [] }) {
             });
             if (!response.ok) throw new Error('Falha na consulta.');
             const dados = await response.json();
-            if (!Array.isArray(dados.Empreendimento)) throw new Error('Resposta inválida.');
-            setEmpreendimentos(dados.Empreendimento);
+            if (!Array.isArray(dados.empreendimento)) throw new Error('Resposta inválida.');
+            setEmpreendimentos(dados.empreendimento);
             setSelecionada(null);
         } catch {
             setErro('Não foi possível atualizar os dados. Tente novamente.');
