@@ -29,11 +29,6 @@ class ReservaRepository implements ReservaRepositoryInterface
             ->get();
     }
 
-    public function existsByUnidadeId(int $unidadeId): bool
-    {
-        return ReservaModel::where('unidade_id', $unidadeId)->exists();
-    }
-
     public function delete(int $reservaId): void
     {
         DB::transaction(function () use ($reservaId): void {

@@ -12,7 +12,5 @@ interface ReservaRepositoryInterface
 
     public function findAll();
 
-    public function existsByUnidadeId(int $unidadeId): bool;
-
     public function create(ReservaModel $reserva): ReservaModel;
 }
